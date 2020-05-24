@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+<style>
+
+path {
+  stroke: #000;
+  fill: none;
+}
+
+  .contour {
+  stroke: #000;
+  fill-opacity: .25;
+  stroke-width: .5;
+  stroke-dasharray: 1;
+  }
+</style>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="https://d3js.org/topojson.v1.min.js"></script>
+<script src="https://d3js.org/d3-contour.v1.min.js"></script>
+<script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+<script src="https://unpkg.com/d3-simple-slider"></script>
+<body>
+<title>Sherlock Homes</title>
+<!--<h1 align = "center">Sherlock Homes <i class="material-icons">home</i><i class="material-icons">search</i></h1>!-->
+<div id='neighborhoodPopover'></div>
+<div class="container">
+<h4>Cheap Rental Cost</h4>
+  <div class="row align-items-center">
+    <div class="col-sm-2"><p id="value-simple1"></p></div>
+    <div class="col-sm"><div id="slider-simple1"></div></div>
+  </div>
+<h4>Safety</h4>
+  <div class="row align-items-center">
+    <div class="col-sm-2"><p id="value-simple2"></p></div>
+    <div class="col-sm"><div id="slider-simple2"></div></div>
+  </div>
+<h4>Low Pollution</h4>
+  <div class="row align-items-center">
+    <div class="col-sm-2"><p id="value-simple3"></p></div>
+    <div class="col-sm"><div id="slider-simple3"></div></div>
+  </div>
+<h4>Travel Distance</h4>
+  <div class="row align-items-center">
+    <div class="col-sm-2"><p id="value-simple4"></p></div>
+    <div class="col-sm"><div id="slider-simple4"></div></div>
+  </div>
+<h3 align = "center">Data/Forecast Year</h3>
+  <div class="row align-items-center" align = "center">
+    <div class="col-sm-2"><p id="value-step"></p></div>
+    <div class="col-sm"><div id="slider-step"></div></div>
+  </div>
+</div>
+
+<script>
+
+var slide_range = [0, 0.25, 0.5, 0.75, 1];
+var slide_range_time = [2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023];
+var dataset = [];
+var x_avg = 0;
+var y_avg = 0;
+
+  var nyc_backup = [];
+  var csv_backup = [];
+	
+var svg_map = d3.select('body').append('svg'),
+    width = 900,
+    height = 650;
+  
+  svg_map.attr("width", width)
+  	.attr("height", height).attr("transform","translate(320,-720)")
+
+ d3.queue()
+ .defer(d3.json,"nyc.json")
+ .defer(d3.csv,"final_data.csv")
+ .await(ready);
+  
+  
+function ready(error, nyc, csv_data) {
+
+  var sliderSimple1 = d3
+    .sliderBottom()
+    .min(d3.min(slide_range))
+    .max(d3.max(slide_range))
+    .width(300)
+    .tickFormat(d3.format('.2%'))
+    .ticks(5)
+    .default(0.5)
+    .on('onchange', val => {
+      d3.select('p#value-simple1').text(d3.format('.2%')(val));
+    });
+
+ var gSimple1 = d3
+    .select('div#slider-simple1')
+    .append('svg')
+    .attr('width', 500)
+    .attr('height', 50)
+    .append('g')
+    .attr('transform', 'translate(30,15)');
+
+  gSimple1.call(sliderSimple1);
+
+  d3.select('p#value-simple1').text(d3.format('.2%')(sliderSimple1.value()));
+  
+var sliderSimple2 = d3
+    .sliderBottom()
+    .min(d3.min(slide_range))
+    .max(d3.max(slide_range))
+    .width(300)
+    .tickFormat(d3.format('.2%'))
+    .ticks(5)
+    .default(0.5)
+    .on('onchange', val => {
+      d3.select('p#value-simple2').text(d3.format('.2%')(val));
+    });
+
+ var gSimple2 = d3
+    .select('div#slider-simple2')
+    .append('svg')
+    .attr('width', 500)
+    .attr('height', 50)
+    .append('g')
+    .attr('transform', 'translate(30,15)');
+
+  gSimple2.call(sliderSimple2);
+
+  d3.select('p#value-simple2').text(d3.format('.2%')(sliderSimple2.value()));
+  
+var sliderSimple3 = d3
+    .sliderBottom()
+    .min(d3.min(slide_range))
+    .max(d3.max(slide_range))
+    .width(300)
+    .tickFormat(d3.format('.2%'))
+    .ticks(5)
+    .default(0.5)
+    .on('onchange', val => {
+      d3.select('p#value-simple3').text(d3.format('.2%')(val));
+    });
+
+ var gSimple3 = d3
+    .select('div#slider-simple3')
+    .append('svg')
+    .attr('width', 500)
+    .attr('height', 50)
+    .append('g')
+    .attr('transform', 'translate(30,15)');
+
+  gSimple3.call(sliderSimple3);
+
+  d3.select('p#value-simple3').text(d3.format('.2%')(sliderSimple3.value()));
+  
+var sliderSimple4 = d3
+    .sliderBottom()
+    .min(d3.min(slide_range))
+    .max(d3.max(slide_range))
+    .width(300)
+    .tickFormat(d3.format('.2%'))
+    .ticks(5)
+    .default(0.5)
+    .on('onchange', val => {
+      d3.select('p#value-simple4').text(d3.format('.2%')(val));
+    });
+
+ var gSimple4 = d3
+    .select('div#slider-simple4')
+    .append('svg')
+    .attr('width', 500)
+    .attr('height', 50)
+    .append('g')
+    .attr('transform', 'translate(30,15)');
+
+  gSimple4.call(sliderSimple4);
+
+  d3.select('p#value-simple4').text(d3.format('.2%')(sliderSimple4.value()));
+  
+  var sliderStep = d3
+    .sliderBottom()
+    .min(d3.min(slide_range_time))
+    .max(d3.max(slide_range_time))
+	.width(800)
+    .ticks(15)
+	.step(1)
+    .default(2019)
+    .on('onchange', val => {
+      d3.select('p#value-step').text(val);
+    });
+
+  var gStep = d3
+    .select('div#slider-step')
+    .append('svg')
+    .attr('width', 1000)
+    .attr('height', 50)
+    .append('g')
+    .attr('transform', 'translate(120,15)');
+
+  gStep.call(sliderStep);
+
+  d3.select('p#value-step').text(d3.format("d")(sliderStep.value()));
+	
+  nyc_backup = nyc;
+  csv_backup = csv_data;
+
+  //console.log(csv_data);
+  
+  var weighted_map = {};
+  
+  for (i=0; i<csv_data.length; i++){
+	var region_std = csv_data[i]["Region"];
+	weighted_map[region_std] =  sliderSimple1.value()*(50 - csv_data[i]["Price"]) + 5 - sliderSimple2.value()*(csv_data[i]["Crime"])
+	+ sliderSimple3.value()*(50 - csv_data[i]["Pollution"])
+	}
+
+  console.log(weighted_map);
+  var path = d3.geoPath()
+      .projection(d3.geoConicConformal()
+      .parallels([33, 45])
+      .rotate([96, -39])
+      .fitSize([width, height], nyc));
+    
+  svg_map.append("path")
+      .datum(nyc)
+      .attr("d", path)
+  		.attr("id", "nycPath")
+  
+  
+   svg_map.append("clipPath")
+  		.attr("id", "clipPathID")
+    .append("use")
+      .attr("xlink:href","#nycPath");
+    
+  var color = d3.scaleSequential(d3.interpolateBlues);
+
+  var finalScore = [];
+
+  nyc.features.forEach(function(neighborhood) {
+
+	//console.log(neighborhood["properties"]);
+	//console.log(weighted_map);
+    var neighorhood_score =  weighted_map[neighborhood["properties"]["NTAName"]]
+    
+    d3.range(neighorhood_score).map(Object).forEach(function(pop, id) {
+      finalScore.push({"neighborHoodD": neighborhood, popID: id})
+    })
+  })
+  
+  var contourPopData = d3.contourDensity()
+        .x(function(d) { return path.centroid(d.neighborHoodD)[0]; })
+        .y(function(d) { return path.centroid(d.neighborHoodD)[1]; })
+        .size([width, height])
+         .cellSize(10)
+        .bandwidth(20)
+      (finalScore);
+
+  
+     color.domain(d3.extent(contourPopData, function(d) { return d.value }))
+
+//   console.log(finalScore);
+  var contours = svg_map.append("g")
+ 
+      .attr("fill", "none")
+    .selectAll(".contour")
+    .data(contourPopData)
+    .enter().append("g");
+  
+   contours.append("path")
+  			.attr("clip-path","url(#clipPathID)")
+  			.attr("class", "contour")
+    		.style("fill", function(d) { return color(d.value) })
+      	.attr("d", d3.geoPath());
+		
+	var old = 0;
+	
+	window.setInterval(function(){
+	if (sliderSimple1.value() + sliderSimple2.value() + sliderSimple3.value() + sliderSimple4.value() + sliderStep.value() + dataset.length != old) {
+	old = sliderSimple1.value() + sliderSimple2.value() + sliderSimple3.value() + sliderSimple4.value() + sliderStep.value() + dataset.length;
+	//console.log(old);
+	refresh(nyc_backup, csv_backup, sliderSimple1.value(), sliderSimple2.value(), sliderSimple3.value(), sliderSimple4.value(), sliderStep.value());
+	}
+	}, 1000);
+  
+}
+
+function refresh(nyc_backup, csv_backup, w1, w2, w3, w4, year) {
+
+svg_map.selectAll("path").remove();
+svg_map.selectAll(".contour").remove();
+
+var weighted_map = {};
+var points_loc = {};
+var nyc = nyc_backup
+var csv_data = csv_backup;
+  
+  for (i=0; i<csv_data.length; i++){
+	if (csv_data[i]["Year"] == year) {
+		var region_std = csv_data[i]["Region"];
+		weighted_map[region_std] =  w1*(50 - csv_data[i]["Price"]) + 5 - w2*(csv_data[i]["Crime"])
+		+ w3*(50 - csv_data[i]["Pollution"])
+		}
+	}
+
+  console.log(weighted_map);
+  var path = d3.geoPath()
+      .projection(d3.geoConicConformal()
+      .parallels([33, 45])
+      .rotate([96, -39])
+      .fitSize([width, height], nyc));
+    
+  svg_map.append("path")
+      .datum(nyc)
+      .attr("d", path)
+  		.attr("id", "nycPath")
+  
+  
+   svg_map.append("clipPath")
+  		.attr("id", "clipPathID")
+    .append("use")
+      .attr("xlink:href","#nycPath");
+    
+  var color = d3.scaleSequential(d3.interpolateBlues);
+
+  var finalScore = [];
+  var neighborhoodCoordinates = [];
+
+  nyc.features.forEach(function(neighborhood) {
+
+	//console.log(neighborhood["properties"]);
+	//console.log(weighted_map);
+    var neighorhood_score =  weighted_map[neighborhood["properties"]["NTAName"]]
+	
+	
+	if (dataset.length > 0)
+   {
+   for (m=0; m<dataset.length; m++) {
+		x_avg = x_avg + dataset[m][0];
+		y_avg = y_avg + dataset[m][1];
+   }
+	x_avg = x_avg/dataset.length;
+	y_avg = y_avg/dataset.length;
+     var x = path.centroid(neighborhood)[0] - x_avg;
+     var y = path.centroid(neighborhood)[1] - y_avg;
+     neighborhoodCoordinates.push([x, y]);
+	 points_loc[neighborhood["properties"]["NTAName"]] = Math.sqrt(Math.pow(x,2) + Math.pow(y,2))
+	 console.log(neighorhood_score);
+	 neighorhood_score = neighorhood_score + Math.min((500/Math.sqrt(Math.pow(x,2) + Math.pow(y,2))),100)*w4
+	 console.log(neighorhood_score);
+   }
+
+    d3.range(neighorhood_score).map(Object).forEach(function(pop, id) {
+      finalScore.push({"neighborHoodD": neighborhood, popID: id})
+    })
+  })
+  
+  var contourPopData = d3.contourDensity()
+        .x(function(d) { return path.centroid(d.neighborHoodD)[0]; })
+        .y(function(d) { return path.centroid(d.neighborHoodD)[1]; })
+        .size([width, height])
+         .cellSize(10)
+        .bandwidth(20)
+      (finalScore);
+
+  
+     color.domain(d3.extent(contourPopData, function(d) { return d.value }))
+
+//   console.log(finalScore);
+  var contours = svg_map.append("g")
+ 
+      .attr("fill", "none")
+    .selectAll(".contour")
+    .data(contourPopData)
+    .enter().append("g");
+  
+   contours.append("path")
+  			.attr("clip-path","url(#clipPathID)")
+  			.attr("class", "contour")
+    		.style("fill", function(d) { return color(d.value) })
+      	.attr("d", d3.geoPath());
+		
+		
+	 // set projection
+   var projection = d3.geoMercator();
+   // create path variable
+   var path = d3.geoPath()
+   .projection(projection);
+   // set projection parameters
+     projection
+     .scale(1000)
+     .center([-106, 37.5])
+ svg_map.on("click", function() {
+     var coords = d3.mouse(this);
+     dataset.push(coords);
+     console.log(dataset);
+     svg_map.selectAll("circle")
+       .data(dataset).enter()
+       .append("circle")
+       .attr("cx", function (d) { return d[0]; })
+       .attr("cy", function (d) { return d[1]; })
+       .attr("r", "5px")
+       .attr("fill", "red")
+   })
+
+}
+
+</script>
+</body>
