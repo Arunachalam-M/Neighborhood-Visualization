@@ -12,7 +12,7 @@ An interactive frame that suggests the best neighborhoods based on a combination
 
 # D3 Visualization
 
-![D3 Visualization UI](https://github.com/Arunachalam-M/Neighborhood-Visualization/blob/master/Sherlock_homes1.png)
+![D3 Visualization UI](https://github.com/Arunachalam-M/Neighborhood-Visualization/blob/master/Sherlock_homes1.PNG)
 
 The user interface was built using the d3.js library, with sliding scales and mouse-clicks as methods of user interaction. A Likert-scale based user interface evaluation survey was completed by nine test users from the project team’s friends and family. Results indicated most users first use real estate aggregation websites when searching for a new place to live and prefer a more holistic approach that accounts for several features (while still including price).
 
